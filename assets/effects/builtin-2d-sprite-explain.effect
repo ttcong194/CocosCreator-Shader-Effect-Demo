@@ -3,21 +3,30 @@
 // YAML 格式的 CC Effect
 // 此部分为声明流程控制清单
 CCEffect %{
-  # techniques 是一个数组
+  # techniques 是一个数组 Is an array
   techniques:
   # passes 是 techniques 数组的第0项
-  # 同时 passes 也是一个数组，存放渲染管道描述的数组集合
+  # The 0th item of the techniques array
+  # 同时 passes 也是一个数组，存放渲染管道描述的数组集合 
+  # At the same time passes is also an array, storing the array collection described by the rendering pipeline
   - passes:
 
-    # passes 数组的第0项，完整的渲染流水线
-    # vert 属性是指定顶点 Shader 片段的名字，如：这里的顶点 Shader 片段的名字为 vs
+    # passes 数组的第0项，完整的渲染流水线 
+    # The 0th item of the array, the complete rendering pipeline
+    # vert 属性是指定顶点 Shader 片段的名字，如：这里的顶点 Shader 片段的名字为 vs 
+    # The vert attribute is the name of the specified vertex shader fragment. For example, the name of the vertex shader fragment here is vs
     # 根据文档介绍还可以这样子指定片段的入口函数 vs:vert ，那么就代替main函数，vert才是入口函数
+    # According to the documentation, you can also specify the entry function vs:vert of the fragment like this, then instead of the main function, vert is the entry function
     - vert: vs 
       # frag 属性是指定片元 Shader 片段的名字，如：这里的片元 Shader 片段的名字为 fs
+      # The frag attribute is the name of the specified fragment Shader fragment, such as: the name of the fragment Shader fragment here is fs
       # 根据文档介绍还可以这样子指定片段的入口函数 fs:frag ，那么就代替main函数，frag才是入口函数
+      # According to the documentation, you can also specify the entry function fs:frag of the fragment like this, then instead of the main function, frag is the entry function
       frag: fs
 
       # 混合模式开启
+      # Hybrid mode is on
+      # more properties https://docs.cocos.com/creator3d/manual/en/material-system/pass-parameter-list.html
       blendState:
         targets:
         - blend: true
@@ -25,48 +34,65 @@ CCEffect %{
         cullMode: none
 
       # properties 列出可以在 Inspector 编辑器编辑的属性
+      # properties List the properties that can be edited in the Inspector editor
       properties:
         texture: { value: white }
         alphaThreshold: { value: 0.5 }
 }%
 
 // 顶点 Shader 片段
+// Vertex Shader fragmen
 CCProgram vs %{
   // 定义 float 类型的精度为高精度
+  // Define the precision of float type as high precision
   precision highp float;
 
   // CC 所有内置的 Shader 变量都必须要要通过 #include 引入该变量的头文件
+  // All built-in Shader variables of CC must be included in the header file of the variable through #include
   // 所有头文件都在 chunks 目录下
+  // All header files are in the chunks directory
   // Mac: /Applications/CocosCreator.app/Contents/Resources/engine/cocos2d/renderer/build/chunks
   // 也可以通过 相对项目assets的相对路径 或者 绝对路径 引用头文件资源
+  // You can also refer to header file resources by relative path or absolute path of relative project assets
   #include <cc-global>
   #include <cc-local>
 
   // 顶点Shader 从渲染管道里面获取哪些数据
+  // What data does the vertex shader get from the rendering pipeline
   // in 用在函数的参数中，表示这个参数是输入的，在函数中改变这个值，并不会影响对调用的函数产生副作用。（相当于C语言的传值），这个是函数参数默认的修饰符
-
+  // in is used in the parameter of a function to indicate that this parameter is input. Changing this value in the function will not affect the side effects of the called function. (Equivalent to passing value in C language), this is the default modifier for function parameters
   // 顶点坐标
+  // vertex coordinates
   // a_position 是笛卡尔坐标右手系，也是OpenGL的坐标系，原点在左下角，X轴正方向往右，Y轴正方向往上，Z轴正方向往外
+  // a_position is the right-hand Cartesian coordinate system, which is also the OpenGL coordinate system. The origin is in the lower left corner, the positive direction of the X axis goes to the right, the positive direction of the Y axis goes up, and the positive direction of the Z axis goes out
   in vec3 a_position;
 
   // 顶点颜色，实际为对应节点的颜色
+  // Vertex color, actually the color of the corresponding node
   in vec4 a_color;
 
   // out 用在函数的参数中，表示该参数是输出参数，值是会改变的
-
+  // out is used in the parameters of the function to indicate that the parameter is an output parameter and the value will change
   // 顶点 Shader 片段最后会输出的颜色值
+  // The color value that the vertex shader fragment will output at the end
   // 在片元 Shader 片段中可以接收到这个参数名的值
+  // The value of this parameter name can be received in the fragment Shader fragment
   out vec4 v_color;
 
   // 定义了一个宏，如果使用了纹理那么执行这之间的代码
+  // A macro is defined, if a texture is used, then the code in between is executed
   #if USE_TEXTURE
 
   // 输入的纹理坐标
+  // input texture coordinates
   // a_uv0 是标准屏幕坐标系，即原点在左上角，X轴正方向往右，Y轴正方向往下
+  // a_uv0 is the standard screen coordinate system, that is, the origin is in the upper left corner, the positive direction of the X axis goes to the right, and the positive direction of the Y axis goes down
   in vec2 a_uv0;
 
   // 输出的纹理坐标
+  // output texture coordinates
   // 在片元 Shader 片段中可以接收到这个参数名的值
+  // The value of this parameter name can be received in the fragment Shader fragment
   out vec2 v_uv0;
   #endif
 
@@ -90,25 +116,34 @@ CCProgram vs %{
 }%
 
 // 片元着色器片段
+// Fragment shader fragment
 CCProgram fs %{
   precision highp float;
   
   // 这里引入了内置的chunks目录下的 alpha-test 头文件
+  // Here introduces the alpha-test header file in the built-in chunks directory
   #include <alpha-test>
 
   // 接收来自上方顶点 Shader 片段的输出参数 v_color
   // 顶点的颜色
+  // Receive the output parameter v_color from the upper vertex Shader fragment
+  // vertex color
   in vec4 v_color;
 
   #if USE_TEXTURE
 
   // 接收来自上方顶点 Shader 片段的输出参数 v_uv0
   // 顶点的坐标
+  // Receive output parameters from the upper vertex Shader fragment v_uv0
+  // The coordinates of the vertices
   in vec2 v_uv0;
 
   // uniform ：一致变量。在着色器执行期间一致变量的值是不变的
   // 与const常量不同的是，这个值在编译时期是未知的是由着色器外部初始化的
   // 一致变量在顶点着色器和片段着色器之间是共享的。它也只能在全局范围进行声明。
+  // uniform: uniform variable. The value of the consistent variable is constant during the execution of the shader
+  // Unlike the const constant, this value is unknown at compile time and is initialized outside the shader
+  // Consistent variables are shared between the vertex shader and the fragment shader. It can only be declared in the global scope.
   uniform sampler2D texture;
   #endif
 
@@ -123,11 +158,15 @@ CCProgram fs %{
     #endif
 
     // 纹理颜色 和 节点颜色进行混合得出最终颜色
+    // The texture color and node color are mixed to get the final color
     o *= v_color;
 
     // 这个方法来自 alpha-test 头文件
     // 意思大概为，如果传入的参数vec4 类型的参数o的透明通道值小于传入来的 alphaThreshold 值时，会discard
     // 使用discard会退出片段着色器，不执行后面的片段着色操作。片段也不会写入帧缓冲区。
+    // This method comes from the alpha-test header file
+    // It probably means that if the transparent channel value of the parameter o of type vec4 is less than the value of alphaThreshold passed in, it will be discarded
+    // Using discard will exit the fragment shader and not perform the subsequent fragment shading operations. The fragment will not be written to the frame buffer.
     ALPHA_TEST(o);
 
     gl_FragColor = o;
